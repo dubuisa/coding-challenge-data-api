@@ -1,16 +1,20 @@
+from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
 
 
-class DialogInput(SQLModel):
+class DialogInput(BaseModel):
     text : str
     language: str
 
 
-class DialogBase(DialogInput):
+class Dialog(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
     customerId: int
     dialogId: int
+    consent: bool = False
+    text : str
+    language: str
 
-class Dialog(DialogBase, table=True):
-    id: int = Field(default=None, primary_key=True)
 
-
+class Consent(BaseModel):
+    is_accepted: bool
