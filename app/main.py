@@ -45,7 +45,7 @@ async def add_dialog(
     response_class=Response,
 )
 async def send_consent(
-    dialogId: int, consent: Consent, db: AsyncSession = Depends(get_session)
+    dialogId: int, consent: ConsentInput, db: AsyncSession = Depends(get_session)
 ):
 
     if consent.is_accepted:
