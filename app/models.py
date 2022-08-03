@@ -1,20 +1,21 @@
+from typing import Optional
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
 
 
 class DialogInput(BaseModel):
-    text : str
+    text: str
     language: str
 
 
 class Dialog(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     customerId: int
     dialogId: int
     consent: bool = False
-    text : str
+    text: str
     language: str
 
 
-class Consent(BaseModel):
+class ConsentInput(BaseModel):
     is_accepted: bool
