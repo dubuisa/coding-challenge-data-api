@@ -1,6 +1,7 @@
 import asyncio
 from http import client
 import pytest
+from sqlalchemy import select
 from starlette import status
 
 from fastapi.testclient import TestClient
@@ -12,11 +13,14 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 
 async def create_test_client():
+    """
+    Creates a test application with in-memory database
+    """
+
     from app.main import app
 
     test_client = TestClient(app)
 
-    # https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html
     from app.db import engine
     from sqlalchemy import insert
 
@@ -57,10 +61,26 @@ async def create_test_client():
             )
         )
 
-    return test_client
+    return test_client, engine
 
 
-client = asyncio.run(create_test_client())
+async def get_data_by_dialogId(db, dialogId):
+    """
+    Retrieves Dialogs by `dialogId`
+
+    For test purpose only
+    """
+    async with db.begin() as conn:
+        data = await conn.execute(select(Dialog).where(Dialog.dialogId == dialogId))
+        return data.scalars().all()
+
+
+client, db = asyncio.run(create_test_client())
+
+
+def test_get_data_by_dialogId():
+    data = asyncio.run(get_data_by_dialogId(db, 2))
+    assert len(data) == 1
 
 
 def test_status_up():
@@ -84,18 +104,25 @@ def test_post_empty_dialog_should_return_422():
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_post_empty_dialog_should_return_422():
-    customerId = 42
+@pytest.mark.parametrize(
+    "customerId,dialogId",
+    [
+        (-1, 42),
+        (42, -1),
+    ],
+)
+def test_post_dialog_with_negative_id_should_return_422(customerId, dialogId):
+    customerId = -1
     dialogId = 1291
-    response = client.post(f"/data/{customerId}/{dialogId}", json={})
+    response = client.post(
+        f"/data/{customerId}/{dialogId}",
+        json={"text": "This is a test!", "language": "en"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-
-def test_post_empty_dialog_should_return_422():
-    customerId = 42
-    dialogId = 1291
-    response = client.post(f"/data/{customerId}/{dialogId}", json={})
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert (
+        response.json()["detail"][0]["msg"]
+        == "ensure this value is greater than or equal to 0"
+    )
 
 
 @pytest.mark.parametrize(
@@ -174,3 +201,21 @@ def test_give_positive_consent_should_update_db_and_data_should_be_selectable():
     assert data[0]["dialogId"] == dialogId
     assert data[0]["language"] == language
     assert data[0]["text"] == text
+
+
+def test_refuse_consent_should_return_204_and_delete_dialogs():
+    language = "it"
+    customerId = 123
+    dialogId = 123
+    text = "This is a test!"
+    payload = {"text": text, "language": language}
+
+    # create dialog
+    client.post(f"/data/{customerId}/{dialogId}", json=payload)
+
+    reponse = client.post(f"/consents/{dialogId}", json={"is_accepted": False})
+
+    assert reponse.status_code == status.HTTP_204_NO_CONTENT
+
+    data = asyncio.run(get_data_by_dialogId(db, dialogId))
+    assert data == []

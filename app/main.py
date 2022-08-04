@@ -1,9 +1,9 @@
 from typing import List
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Path, Query
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import get_session, init_db
+from app.db import get_session
 from app.dialog_repository import (
     select_dialogs,
     save_dialog,
@@ -19,13 +19,9 @@ app = FastAPI()
 cache = dict()
 
 
-@app.on_event("startup")
-async def on_startup():
-    init_db()
-
-
 @app.get("/status")
 async def get_service_status():
+    """Retrieves API status"""
     return {"status": "up"}
 
 
@@ -35,11 +31,16 @@ async def get_service_status():
     response_class=Response,
 )
 async def add_dialog(
-    customerId: int,
-    dialogId: int,
     dialog_input: DialogInput,
+    customerId: int = Path(ge=0),
+    dialogId: int = Path(ge=0),
     db: AsyncSession = Depends(get_session),
 ):
+    """
+    Saves a Dialog to the database.
+
+    Dialog will not be selectable without customer consent.
+    """
 
     await save_dialog(db, dialog=dialog_input, customerId=customerId, dialogId=dialogId)
 
@@ -50,8 +51,16 @@ async def add_dialog(
     response_class=Response,
 )
 async def send_consent(
-    dialogId: int, consent: ConsentInput, db: AsyncSession = Depends(get_session)
+    consent: ConsentInput,
+    dialogId: int = Path(title="The ID of the dialog", ge=0),
+    db: AsyncSession = Depends(get_session),
 ):
+    """
+    Consent/Refuse to make the `dialogId` dialogs available to improve the model.
+
+    - Giving consent makes the `dialogId` data accessible through GET /data endpoint
+    - Refuse deletes Dialogs related to the given `dialogId`
+    """
 
     if consent.is_accepted:
         await update_dialogs(db, dialogId=dialogId)
@@ -61,9 +70,14 @@ async def send_consent(
 
 @app.get("/data/", response_model=List[Dialog])
 async def get_data(
-    language: str = None,
-    customerId: int = None,
+    language: str = Query(default=None),
+    customerId: int = Query(default=None, ge=0),
     db: AsyncSession = Depends(get_session),
 ):
+    """
+    Retrieves consented dialogs sorted by most recent with optional`language` and `customerId` filters.
+
+    """
+    
     dialogs = await select_dialogs(db, language=language, customerId=customerId)
     return dialogs

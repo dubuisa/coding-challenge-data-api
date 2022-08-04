@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
 
 
+class ConsentInput(BaseModel):
+    is_accepted: bool
+
+
 class DialogInput(BaseModel):
     text: str
     language: str
@@ -15,7 +19,3 @@ class Dialog(SQLModel, table=True):
     consent: bool = False
     text: str
     language: str
-
-
-class ConsentInput(BaseModel):
-    is_accepted: bool
