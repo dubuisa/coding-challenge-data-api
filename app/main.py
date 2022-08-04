@@ -16,9 +16,6 @@ from starlette import status
 
 app = FastAPI()
 
-cache = dict()
-
-
 @app.get("/status")
 async def get_service_status():
     """Retrieves API status"""
@@ -76,7 +73,6 @@ async def get_data(
 ):
     """
     Retrieves consented dialogs sorted by most recent with optional`language` and `customerId` filters.
-
     """
     
     dialogs = await select_dialogs(db, language=language, customerId=customerId)
