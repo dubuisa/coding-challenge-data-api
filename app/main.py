@@ -1,18 +1,14 @@
 from typing import List
+
 from fastapi import Depends, FastAPI, Path, Query
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from app.db import get_session
-from app.dialog_repository import (
-    select_dialogs,
-    save_dialog,
-    delete_dialogs,
-    update_dialogs,
-)
+from app.dialog_repository import (delete_dialogs, save_dialog, select_dialogs,
+                                   update_dialogs)
 from app.models import ConsentInput, Dialog, DialogInput
-
-from starlette import status
 
 app = FastAPI()
 

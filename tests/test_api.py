@@ -1,11 +1,11 @@
 import asyncio
+import os
 from http import client
+
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import select
 from starlette import status
-
-from fastapi.testclient import TestClient
-import os
 
 from app.models import Dialog
 
@@ -21,8 +21,9 @@ async def create_test_client():
 
     test_client = TestClient(app)
 
-    from app.db import engine
     from sqlalchemy import insert
+
+    from app.db import engine
 
     async with engine.begin() as conn:
 

@@ -1,6 +1,7 @@
-from sqlalchemy import update, delete, insert, select
-from app.models import Dialog, DialogInput
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Dialog, DialogInput
 
 
 async def delete_dialogs(db: AsyncSession, dialogId: int):
