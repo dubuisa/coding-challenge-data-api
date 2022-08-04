@@ -16,7 +16,7 @@ FastAPI project that uses
  - Alembic
  - Docker
 
-## How to run this API?
+## How to run this API:
 To launch this project, you must have docker compose installed (see [link](https://docs.docker.com/compose/install/) for installation)
 
 Then you can run the following command to run the project
@@ -48,4 +48,8 @@ poetry install
 poetry run pytest --cov=app --cov=tests --cov-report=term-missing
 ```
 
+# Disclamer
 
+This project has been developed and tested only on Linux. 
+
+It is therefore possible that this project will not work "as-is" on a Windows environment. (especially for the postgres volume path on the `docker-compose.yml`)
