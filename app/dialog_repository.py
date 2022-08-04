@@ -34,4 +34,4 @@ async def select_dialogs(db: AsyncSession, customerId: int, language: str):
 
     query = select(Dialog).where(*filters).order_by(Dialog.id.desc())
     result = await db.execute(query)
-    return result.all()
+    return result.scalars().all()

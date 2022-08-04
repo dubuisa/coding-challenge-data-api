@@ -3,20 +3,25 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import get_session
+from app.db import get_session, init_db
 from app.dialog_repository import (
     select_dialogs,
     save_dialog,
     delete_dialogs,
     update_dialogs,
 )
-from app.models import ConsentInput, DialogInput
+from app.models import ConsentInput, Dialog, DialogInput
 
 from starlette import status
 
 app = FastAPI()
 
 cache = dict()
+
+
+@app.on_event("startup")
+async def on_startup():
+    init_db()
 
 
 @app.get("/status")
@@ -54,7 +59,7 @@ async def send_consent(
         await delete_dialogs(db, dialogId=dialogId)
 
 
-@app.get("/data/")
+@app.get("/data/", response_model=List[Dialog])
 async def get_data(
     language: str = None,
     customerId: int = None,

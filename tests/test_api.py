@@ -133,8 +133,8 @@ def test_get_data_should_be_sorted_by_id_descending():
     data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert data[0]["Dialog"]["id"] > data[1]["Dialog"]["id"]
-    assert data[1]["Dialog"]["id"] > data[2]["Dialog"]["id"]
+    assert data[0]["id"] > data[1]["id"]
+    assert data[1]["id"] > data[2]["id"]
 
 
 def test_give_positive_consent_should_update_db_and_data_should_be_selectable():
@@ -170,7 +170,7 @@ def test_give_positive_consent_should_update_db_and_data_should_be_selectable():
         },
     ).json()
     assert len(data) == 1
-    assert data[0]["Dialog"]["customerId"] == customerId
-    assert data[0]["Dialog"]["dialogId"] == dialogId
-    assert data[0]["Dialog"]["language"] == language
-    assert data[0]["Dialog"]["text"] == text
+    assert data[0]["customerId"] == customerId
+    assert data[0]["dialogId"] == dialogId
+    assert data[0]["language"] == language
+    assert data[0]["text"] == text
