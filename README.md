@@ -9,17 +9,17 @@
 </p>
 
 
-FastAPI project that uses 
- - async SQLAlchemy
- - SQLModel
- - Postgres
- - Alembic
- - Docker
+This API exposes endpoint to:
+
+- Send dialogs
+- Consent/Refuse to make the dialogs available
+- Retrieve consented dialogs
+
 
 ## How to run this API:
-To launch this project, you must have docker compose installed (see [link](https://docs.docker.com/compose/install/) for installation)
+This project requires Docker compose (see [link](https://docs.docker.com/compose/install/) for installation).
 
-Then you can run the following command to run the project
+To run the project execute the following command:
 ```sh
 $ docker compose up -d --build
 ```
@@ -29,7 +29,7 @@ Once the component is instantiated, you can visit the endpoint documentation at 
 Enpoint documentation can be used to interact with the API graphically. It is also possible to query the api directly using curl as follows:
 
 ```sh
-curl -X 'POST' \
+$ curl -X 'POST' \
   'http://localhost:8000/data/256/2048' \
   -H 'accept: */*' \
   -H 'Content-Type: application/json' \
@@ -44,12 +44,13 @@ curl -X 'POST' \
 You can simply do the following:
 
 ```sh
-poetry install
-poetry run pytest --cov=app --cov=tests --cov-report=term-missing
+$ poetry install
+$ poetry run pytest tests/ --cov=app --cov=tests --cov-report=term-missing
 ```
 
-# Disclamer
+
+# Disclaimer
 
 This project has been developed and tested only on Linux. 
 
-It is therefore possible that this project will not work "as-is" on a Windows environment. (especially for the postgres volume path on the `docker-compose.yml`)
+It is therefore possible that this project will not work "as-is" on a Windows environment.

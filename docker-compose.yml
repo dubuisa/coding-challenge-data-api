@@ -20,4 +20,4 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - /tmp/postgres-data:/var/lib/postgresql/data:cached
+      - ./postgres-data:/var/lib/postgresql/data:cached
